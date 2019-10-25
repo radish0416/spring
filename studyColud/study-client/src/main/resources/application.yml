@@ -1,0 +1,49 @@
+server:
+  port: 8091
+  tomcat:
+    max-http-post-size: 102400000  #100MB
+#    accesslog:  #tomcat 日志
+#      enabled: true
+#      directory: D:/tmp/logs
+
+spring:
+  profiles:
+    active: @spring.profiles.active@
+  application:
+    name: study-client
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      enabled: true
+      max-request-size: 100MB
+    livereload:
+      port: 35730
+  jackson:
+    time-zone: GMT+8
+
+
+
+
+hystrix:
+  metrics:
+    enabled: true
+    polling-interval-ms: 2000
+
+
+push_file_path: /root/upload/securityKey
+ios:
+  pool_size: 10
+  keystore_path: ${push_file_path}/aps_dev.p12
+  password: sl1234
+  sound: default
+  production: false
+
+fcm:
+  json_path: ${push_file_path}/serviceAccountKey.json
+  data_url: https://ording0612.firebaseio.com
+  topic: China
+  app_name: OrdingSdc
+  pool_size: 10
+  need_proxy: false
+  proxy_host: localhost
+  proxy_port: 8086

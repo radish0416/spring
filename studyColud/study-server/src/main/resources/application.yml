@@ -1,0 +1,41 @@
+spring:
+  profiles:
+    active: @spring.profiles.active@
+  application:
+    name: study-server
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+
+
+#pagehelper分页插件配置
+pagehelper:
+  helperDialect: mysql
+  rowBoundsWithCount: true
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+  pageSizeZero: false
+  returnPageInfo: check
+
+
+
+mybatis:
+  type-aliases-package: com.example.studyserve
+  type-handlers-package: com.example.studyserve.common.mybatis.typehandler
+  mapper-locations: classpath:/com/example/studyserver/*/dao/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: false
+    default-fetch-size: 100
+    default-statement-timeout: 30
+
+info:
+  app.name: study-server
+  company.name: www.shule.com
+  build.artifactId: $project.artifactId$
+  build.version: $project.version$
+
+zk:
+  address: 192.168.1.141
+  lock:
+    path: /test

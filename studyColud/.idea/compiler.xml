@@ -10,7 +10,6 @@
         <module name="study-client" />
         <module name="study-server" />
         <module name="eureka-7001" />
-        <module name="studyColud" />
       </profile>
     </annotationProcessing>
   </component>

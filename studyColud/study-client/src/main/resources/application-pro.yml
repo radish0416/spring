@@ -1,0 +1,28 @@
+eureka:
+  client:
+    enabled: true
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://admin:123@172.31.253.139:7001/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.ip-address:${server.port}}
+
+logging:
+  level:
+    com.shule.cloud.ordering.admin_web: debug
+    org.springframework.web: debug
+
+
+spring:
+  rabbitmq:
+    addresses: 172.31.253.140:5672,172.31.253.140:5673,172.31.253.140:5674
+    username: shule
+    password: shule2019diancan
+
+
+debug: true
+file:
+  #  upload-path: D:/upload/
+  upload-path: /home/images/

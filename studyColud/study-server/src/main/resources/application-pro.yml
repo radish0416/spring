@@ -1,0 +1,67 @@
+server:
+  port: 7903
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://shuleadmin:shule2019diancan@172.31.253.139:20000,172.31.253.140:20000,172.31.253.141:20000/diancan?authSource=admin&connect=replicaSet&readPreference=secondaryPreferred&safe=true&authMechanism=SCRAM-SHA-1&maxPoolSize=500&minPoolSize=10
+  rabbitmq:
+    addresses: 172.31.253.140:5672,172.31.253.140:5673,172.31.253.140:5674
+    username: shule
+    password: shule2019diancan
+  redis:
+    sentinel:
+      master: mymaster
+      nodes: 172.31.253.139:26379,172.31.253.140:26379,172.31.253.141:26379
+      password: shule2019diancan
+  datasource:
+    url: jdbc:mysql://172.31.253.139:8066/TESTDB?characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: 123456
+    #配置初始化大小/最小/最大
+    initial-size: 1
+    min-idle: 1
+    max-active: 20
+    #获取连接等待超时时间
+    max-wait: 60000
+    #间隔多久进行一次检测，检测需要关闭的空闲连接
+    time-between-eviction-runs-millis: 60000
+    #一个连接在池中最小生存的时间
+    min-evictable-idle-time-millis: 300000
+    validation-query: SELECT 'x'
+    test-while-idle: true
+    test-on-borrow: false
+    test-on-return: false
+    #打开PSCache，并指定每个连接上PSCache的大小。oracle设为true，mysql设为false。分库分表较多推荐设置为false
+    pool-prepared-statements: false
+    max-pool-prepared-statement-per-connection-size: 20
+  devtools:
+    restart:
+      enabled: false
+
+eureka:
+  client:
+    enabled: true
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://admin:123@172.31.253.139:7001/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.ip-address:${server.port}}
+
+#日志配置
+logging:
+  level:
+    com.shule.cloud.ordering.admin_service: debug
+    org.springframework.web: debug
+    org.springframework.transaction: debug
+    org.springframework.security: debug
+    org.springframework.data.mongodb.core.MongoTemplate: debug #配置MongoTemplate日志
+    org.mybatis: debug
+
+
+security:
+  initResource: true
+
+debug: true

@@ -3,10 +3,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    <!--这个是主工程的名称，在字模块的pom文件中引入这个主工程就可以使用主工程里面的包-->
     <groupId>com.example.studyColud</groupId>
-    <artifactId>studyColud</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>ordering</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <!--代表该工程所用的的组件的版本号，这样可以实现统一管理-->
     <properties>
@@ -48,6 +49,23 @@
         <module>study-server</module>
         <module>study-client</module>
     </modules>
+
+    <profiles>
+        <!--这是控制工程引用哪一个yml文件，因为带有dev的就是线下配置文件，当上线的时候系统自动切换为带有pro的配置文件-->
+        <profile>
+            <id>dev</id>
+            <activation><activeByDefault>true</activeByDefault></activation>
+            <properties>
+                <spring.profiles.active>dev</spring.profiles.active >
+            </properties>
+        </profile>
+        <profile>
+            <id>pro</id>
+            <properties>
+                <spring.profiles.active>pro</spring.profiles.active>
+            </properties>
+        </profile>
+    </profiles>
     <build>
         <plugins>
             <plugin>
