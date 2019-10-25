@@ -1,0 +1,77 @@
+本项目是根据东南亚扫码点餐项目的权限管理模块进行整理的项目
+1、为了模拟spring cloud项目，这里的company、consumer、waiter三个文件夹分别代表三个微服务，api则代表的是公共的服务，存放javabean,里面的代码有些不全，
+   但是这里只是作为例子展示，缺失的代码都是一些业务逻辑代码，根据实际逻辑进行更改的
+2、将用户权限和资源权限存储到数据库中所涉及到的两张表
+    CREATE TABLE `t_role_dep_user` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `user_id` int(11) NOT NULL COMMENT '用户ID（t_admin_user内的ID）',
+      `role_code` varchar(50) DEFAULT NULL COMMENT '角色代码',
+      `auth_code` text COMMENT '权限列表',
+      `dep_id` int(11) DEFAULT NULL COMMENT '门店id',
+      `company_id` int(11) DEFAULT NULL COMMENT '企业id',
+      `rec_sts` char(1) DEFAULT '0' COMMENT '记录状态，0正常1删除',
+      `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+      PRIMARY KEY (`id`),
+      KEY `role_dep_user_index` (`dep_id`,`user_id`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=1610 DEFAULT CHARSET=utf8mb4 COMMENT='门店用户与角色表';
+
+    CREATE TABLE `t_role_resource` (
+      `res_code` varchar(200) NOT NULL COMMENT '资源代码',
+      `res_type` varchar(50) DEFAULT NULL COMMENT '资源类型',
+      `res_name` varchar(100) DEFAULT NULL COMMENT '资源名称',
+      `res_value` varchar(200) NOT NULL COMMENT '资源值，请求路径等',
+      `auth_code` varchar(200) NOT NULL COMMENT '权限列表',
+      `auth_name` varchar(200) DEFAULT NULL COMMENT '权限名称',
+      `role_code` varchar(200) DEFAULT NULL COMMENT '角色代码',
+      `role_name` varchar(100) DEFAULT NULL COMMENT '角色名称',
+      `app_type` varchar(100) NOT NULL COMMENT '应用类型',
+      `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (`res_code`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资源与角色表';
+3、security原理：t_role_dep_user表存放的是用户所拥有的全部权限，t_role_resource存放的是每个节点也就是请求每个接口所需要的权限
+   程序启动后会从t_role_resource表中将所有的接口和权限取出来存放在map中，然后用户登录成功后，从t_role_dep_user表中将用户所拥有的的权限取出，存放在用户信息中
+   在决策器那里，每次用户请求接口时，会将用户所拥有的的权限列表和该节点需要的权限进行一一对比，有的话就通过，不然就拦截
+4、项目结构:主要讲解company微服务和consumer微服务的结构，waiter的结构和company的一样
+   4.1、company微服务结构讲解:security文件夹存放的是security相关的配置和代码块,test是实际的项目逻辑代码块，utils是工具类代码块，这里讲解security文件夹
+      1) compont文件夹：
+         AuthResource是自定义的注解，放在每个接口请求方法前面，标明请求这个接口需要什么权限，这里在test文件夹的controller文件夹中可以查看
+         SecurityStartUp在程序启动后会进行全局扫描，将每个接口的信息和权限信息存入map中，根据开关是否存入数据库t_role_resource表中，开关在application.yml的security.initResource字段控制
+      2) config文件夹
+         ShuleSecurityConfiguration是程序启动后对security各个配置文件的一个调度，也就是security的主函数，这一块基本可以复制粘贴
+      3) mapper文件夹
+         UserRoleResourceDao 数据库操作类
+      4) phonecode文件夹
+         PhoneCodeAuthenticationProcessingFilter是将验证码登录的请求直接接管过来，然后将数据格式转换为security默认的验证码登录的数据格式
+         （默认的手机号字段:phone,验证码字段:code，token字段:token,这里传入的字段名因项目而改变）
+         PhoneCodeAuthenticationProvider得到security默认的验证码登录的数据格式，然后进行登录处理
+      5) phonepwd文件夹
+         EurekaUserPasswordEncoder用户密码加密后的密码比对
+         PasswordAuthenticationProcessingFilter是将密码登录的请求直接接管过来，然后将数据格式转换为security默认的密码登录的数据格式
+         （默认的用户名字段:username,密码字段:password，传入的用户名字段:phone,密码字段:password,这里传入的字段名因项目而改变）
+         NamePwdAuthenticationProvider得到security默认的密码登录的数据格式，然后进行登录处理
+      6) service文件夹
+         ShuleAccessDecisionManager决策器，在请求接口时判断权限的
+         ShuleAccessDeniedHandler解决认证过的用户访问无权限资源时的异常
+         ShuleAuthenticationEntryPoint匿名用户访问无权限资源时的异常
+         ShuleAuthenticationFailureHandler用户权限认证登录失败的处理
+         ShuleAuthenticationSuccessHandler用户权限登录成功后的处理
+         ShuleFilterInvocationSecurityMetadataSource请求接口时返回该接口所需要的权限，供决策器使用
+         ShuleUserDetailsServiceImpl加载用户所有的权限列表
+      7) tokencode文件夹
+         MyHttpServletRequestWrapper封装的一个http请求类
+         TokenCodeFilter全局拦截token，进行验证
+   4.2、consumer微服务结构讲解：security是切片处理的文件夹，exception是全局的异常捕获文件夹
+       1)exception文件夹
+         ConsumerExceptionHandler用户登录异常处理
+         ConsumerLoginException捕获用户登录异常
+         WaiterAccessException服务员登录异常
+       2)security文件夹
+         NeedLogin自定义注解，放在需要用户登录才能访问的接口方法前面
+         WaiterAuthentication自定义注解，放在服务员登录才能访问的接口方法前面
+         LoginAspect用户请求有needlogin注解的接口时拦截token，判断用户是否登录，未登录直接拒绝访问
+         WaiterAspect用户请求有WaiterAuthentication注解的接口时拦截token，判断用户是否有权限访问该节点，没有直接拒绝访问，这里需要比对服务员的权限
+
+
+
+
