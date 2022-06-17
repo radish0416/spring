@@ -39,7 +39,7 @@
         <codehaus.jackson.version>1.9.13</codehaus.jackson.version>
         <poi.version>3.14</poi.version>
         <itextpdf.version>5.5.13</itextpdf.version>
-        <fastjson.version>1.2.49</fastjson.version>
+        <fastjson.version>1.2.83</fastjson.version>
     </properties>
 
     <!-- 当前Module需要用到的jar包，按自己需求添加，如果父类已经包含了，可以不用写版本号 -->
